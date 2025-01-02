@@ -4,33 +4,22 @@
     <title>WebAR GIF Player</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
-    <style>
-        .gif-overlay {
-            visibility: hidden;
-            position: fixed;
-        }
-    </style>
     <script>
         AFRAME.registerComponent('gif-handler', {
             init: function() {
                 let el = this.el;
-                let gifElement = document.createElement('img');
-                gifElement.className = 'gif-overlay';
-                gifElement.src = './pulsing effect.gif';  // Replace with your GIF URL
-                document.body.appendChild(gifElement);
-                
                 let isPlaying = false;
-                let originalGif = gifElement.src;
+                const gifSrc = './top.gif';  // Replace with your GIF filename
 
                 el.addEventListener('click', function() {
+                    const material = el.getAttribute('material');
                     if (!isPlaying) {
-                        // Force GIF reload to restart animation
-                        gifElement.src = '';
-                        gifElement.src = originalGif;
+                        material.src = gifSrc;
+                        el.setAttribute('material', material);
                         isPlaying = true;
                     } else {
-                        // Pause by removing source
-                        gifElement.src = '';
+                        material.src = '';
+                        el.setAttribute('material', material);
                         isPlaying = false;
                     }
                 });
@@ -39,20 +28,18 @@
     </script>
 </head>
 <body style="margin: 0px; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        <!-- Create marker-based AR content -->
-        <a-marker preset="hiro">
-            <a-plane 
-                position="0 0 0" 
-                rotation="-90 0 0" 
-                width="2" 
-                height="2" 
-                material="src: /api/placeholder/300/300; transparent: true"
-                gif-handler>
-            </a-plane>
-        </a-marker>
+    <a-scene embedded arjs="sourceType: webcam; videoTexture: true; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;">
+        <!-- Create markerless AR content -->
+        <a-plane 
+            position="0 0 -2"  
+            rotation="0 0 0"
+            width="1.5" 
+            height="1.5" 
+            material="src: ./your-gif.gif; transparent: true"
+            gif-handler>
+        </a-plane>
 
-        <a-entity camera></a-entity>
+        <a-camera position="0 0 0" look-controls wasd-controls></a-camera>
     </a-scene>
 </body>
 </html>
