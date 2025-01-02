@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebAR GIF Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
+    <style>
+        .gif-overlay {
+            visibility: hidden;
+            position: fixed;
+        }
+    </style>
+    <script>
+        AFRAME.registerComponent('gif-handler', {
+            init: function() {
+                let el = this.el;
+                let gifElement = document.createElement('img');
+                gifElement.className = 'gif-overlay';
+                gifElement.src = './pulsing effect.gif';  // Replace with your GIF URL
+                document.body.appendChild(gifElement);
+                
+                let isPlaying = false;
+                let originalGif = gifElement.src;
+
+                el.addEventListener('click', function() {
+                    if (!isPlaying) {
+                        // Force GIF reload to restart animation
+                        gifElement.src = '';
+                        gifElement.src = originalGif;
+                        isPlaying = true;
+                    } else {
+                        // Pause by removing source
+                        gifElement.src = '';
+                        isPlaying = false;
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body style="margin: 0px; overflow: hidden;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <!-- Create marker-based AR content -->
+        <a-marker preset="hiro">
+            <a-plane 
+                position="0 0 0" 
+                rotation="-90 0 0" 
+                width="2" 
+                height="2" 
+                material="src: /api/placeholder/300/300; transparent: true"
+                gif-handler>
+            </a-plane>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html>
