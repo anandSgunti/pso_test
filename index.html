@@ -1,45 +1,42 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>WebAR GIF Player</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
-    <script>
-        AFRAME.registerComponent('gif-handler', {
-            init: function() {
-                let el = this.el;
-                let isPlaying = false;
-                const gifSrc = './top.gif';  // Replace with your GIF filename
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebAR with Animated GIF</title>
+    <!-- Include A-Frame library -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Include AR.js for A-Frame -->
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <!-- Include aframe-gif-shader component -->
+    <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-gif-shader@master/dist/aframe-gif-shader.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <a-scene embedded arjs>
+      <!-- Define assets -->
+      <a-assets>
+        <!-- Preload the GIF -->
+        <img id="animated-gif" src="top.gif" />
+      </a-assets>
 
-                el.addEventListener('click', function() {
-                    const material = el.getAttribute('material');
-                    if (!isPlaying) {
-                        material.src = gifSrc;
-                        el.setAttribute('material', material);
-                        isPlaying = true;
-                    } else {
-                        material.src = '';
-                        el.setAttribute('material', material);
-                        isPlaying = false;
-                    }
-                });
-            }
-        });
-    </script>
-</head>
-<body style="margin: 0px; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; videoTexture: true; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;">
-        <!-- Create markerless AR content -->
-        <a-plane 
-            position="0 0 -2"  
-            rotation="0 0 0"
-            width="15" 
-            height="15" 
-            material="src: ./your-gif.gif; transparent: false"
-            gif-handler>
-        </a-plane>
+      <!-- Define a marker -->
+      <a-marker preset="hiro">
+        <!-- Attach the GIF to a plane geometry -->
+        <a-entity
+          geometry="primitive: plane; width: 1; height: 1;"
+          material="shader: gif; src: #animated-gif;"
+          position="0 0 0"
+          rotation="-90 0 0"
+        ></a-entity>
+      </a-marker>
 
-        <a-camera position="0 0 0" look-controls wasd-controls></a-camera>
+      <!-- Define a simple camera -->
+      <a-entity camera></a-entity>
     </a-scene>
-</body>
+  </body>
 </html>
