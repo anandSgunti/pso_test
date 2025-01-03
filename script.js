@@ -1,6 +1,7 @@
 // Ensure you include Three.js and its WebXR helpers in your project
-import * as THREE from 'three';
-import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
+import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/webxr/ARButton.js';
+
 
 // Scene, Camera, Renderer setup
 const scene = new THREE.Scene();
