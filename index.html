@@ -2,13 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>WebAR with Animated GIF</title>
+    <title>WebAR with Static Image</title>
     <!-- Include A-Frame library -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <!-- Include AR.js for A-Frame -->
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-    <!-- Include aframe-gif-shader component -->
-    <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-gif-shader@master/dist/aframe-gif-shader.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -20,19 +18,20 @@
     <a-scene embedded arjs>
       <!-- Define assets -->
       <a-assets>
-        <!-- Preload the GIF -->
-        <img id="animated-gif" src="top.gif" />
+        <!-- Preload the image -->
+        <img id="static-image" src="your-image.jpg" />
       </a-assets>
 
       <!-- Define a marker -->
       <a-marker preset="hiro">
-        <!-- Attach the GIF to a plane geometry -->
-        <a-entity
-          geometry="primitive: plane; width: 1; height: 1;"
-          material="shader: gif; src: #animated-gif;"
+        <!-- Attach the image to a plane geometry -->
+        <a-image
+          src="#static-image"
           position="0 0 0"
           rotation="-90 0 0"
-        ></a-entity>
+          width="1"
+          height="1"
+        ></a-image>
       </a-marker>
 
       <!-- Define a simple camera -->
