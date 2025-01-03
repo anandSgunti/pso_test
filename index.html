@@ -4,17 +4,7 @@
     <title>WebAR GIF Display</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script>
-        AFRAME.registerComponent('gif-material', {
-            init: function() {
-                // Force material update to ensure GIF plays
-                const el = this.el;
-                el.addEventListener('materialtextureloaded', () => {
-                    el.getObject3D('mesh').material.map.image.play();
-                });
-            }
-        });
-    </script>
+    <script src="https://unpkg.com/aframe-gif-shader/dist/aframe-gif-shader.min.js"></script>
 </head>
 <body style="margin: 0;">
     <a-scene
@@ -27,8 +17,7 @@
             <a-plane
                 position="0 0 0"
                 rotation="-90 0 0"
-                material="shader: flat; src: #gif; transparent: true;"
-                gif-material
+                gif-shader="src: #gif"
                 width="2"
                 height="2"
             ></a-plane>
