@@ -4,32 +4,33 @@
     <title>WebAR GIF Display</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        .ar-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-        }
-    </style>
+    <script>
+        AFRAME.registerComponent('gif-material', {
+            init: function() {
+                // Force material update to ensure GIF plays
+                const el = this.el;
+                el.addEventListener('materialtextureloaded', () => {
+                    el.getObject3D('mesh').material.map.image.play();
+                });
+            }
+        });
+    </script>
 </head>
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+<body style="margin: 0;">
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
         <a-assets>
-            <img id="animated-gif" src="https://anandsgunti.github.io/pso_test/top.gif">
+            <img id="gif" src="https://anandsgunti.github.io/pso_test/top.gif" crossorigin="anonymous">
         </a-assets>
-
         <a-marker preset="hiro">
             <a-plane
-                position="0 0.5 0"
+                position="0 0 0"
                 rotation="-90 0 0"
-                material="src: #animated-gif; transparent: true; opacity: 1;"
-                width="3"
-                height="3"
-                animation="property: rotation; to: -90 360 0; loop: true; dur: 15000; easing: linear"
+                material="shader: flat; src: #gif; transparent: true;"
+                gif-material
+                width="2"
+                height="2"
             ></a-plane>
         </a-marker>
         <a-entity camera></a-entity>
