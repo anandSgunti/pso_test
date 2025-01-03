@@ -1,9 +1,7 @@
-// Ensure you include Three.js and its WebXR helpers in your project
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
 import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/webxr/ARButton.js';
 
 
-// Scene, Camera, Renderer setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -11,14 +9,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// Add AR Button for enabling AR mode
 document.body.appendChild(ARButton.createButton(renderer));
 
-// Lighting for the scene
 const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
 scene.add(light);
 
-// Reticle for detecting horizontal surfaces
 let reticle;
 const reticleGeometry = new THREE.RingGeometry(0.1, 0.15, 32).rotateX(-Math.PI / 2);
 const reticleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -26,7 +21,6 @@ reticle = new THREE.Mesh(reticleGeometry, reticleMaterial);
 reticle.visible = false;
 scene.add(reticle);
 
-// Function to add an object at the detected surface
 const addObject = (position) => {
     const boxGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
     const boxMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
@@ -35,7 +29,6 @@ const addObject = (position) => {
     scene.add(box);
 };
 
-// Handle AR session events
 renderer.xr.addEventListener('sessionstart', () => {
     console.log('AR session started');
 });
@@ -48,11 +41,9 @@ controller.addEventListener('select', () => {
 });
 scene.add(controller);
 
-// Animation loop
 renderer.setAnimationLoop(() => {
     renderer.render(scene, camera);
 
-    // Update the reticle based on AR hit testing
     const session = renderer.xr.getSession();
     if (session) {
         const frame = renderer.xr.getFrame();
@@ -79,7 +70,6 @@ renderer.setAnimationLoop(() => {
     }
 });
 
-// Handle window resizing
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
