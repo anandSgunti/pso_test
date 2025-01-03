@@ -1,55 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebAR with Animated GIF</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://raw.githack.com/mayognaise/aframe-gif-shader/master/dist/aframe-gif-shader.min.js"></script>
+    <title>WebAR GIF Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
-        .arjs-loader {
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .arjs-loader div {
-            text-align: center;
-            font-size: 1.25em;
-            color: white;
+        .gif-overlay {
+            visibility: hidden;
+            position: fixed;
         }
     </style>
+    <script>
+        AFRAME.registerComponent('gif-handler', {
+            init: function() {
+                let el = this.el;
+                let gifElement = document.createElement('img');
+                gifElement.className = 'gif-overlay';
+                gifElement.src = "https://anandsgunti.github.io/pso_test/top.gif";  // Replace with your GIF URL
+                document.body.appendChild(gifElement);
+                
+                let isPlaying = false;
+                let originalGif = gifElement.src;
+
+                el.addEventListener('click', function() {
+                    if (!isPlaying) {
+                        // Force GIF reload to restart animation
+                        gifElement.src = '';
+                        gifElement.src = originalGif;
+                        isPlaying = true;
+                    } else {
+                        // Pause by removing source
+                        gifElement.src = '';
+                        isPlaying = false;
+                    }
+                });
+            }
+        });
+    </script>
 </head>
 <body style="margin: 0px; overflow: hidden;">
-    <div class="arjs-loader">
-        <div>Loading, please wait...</div>
-    </div>
-    
-    <a-scene
-        embedded
-        arjs='sourceType: webcam; debugUIEnabled: false;'
-        renderer='logarithmicDepthBuffer: true;'
-        vr-mode-ui="enabled: false"
-    >
-        <a-assets>
-            <img id="animated-gif" src="https://anandsgunti.github.io/pso_test/top.gif" crossorigin="anonymous">
-        </a-assets>
-
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <!-- Create marker-based AR content -->
         <a-marker preset="hiro">
-            <a-entity
-                geometry="primitive: plane; width: 1; height: 1;"
-                material="shader: gif; src: #animated-gif;"
-                position="0 0 0"
-                rotation="-90 0 0"
-            ></a-entity>
+            <a-plane 
+                position="0 0 0" 
+                rotation="-90 0 0" 
+                width="2" 
+                height="2" 
+                material="src: /api/placeholder/300/300; transparent: true"
+                gif-handler>
+            </a-plane>
         </a-marker>
 
         <a-entity camera></a-entity>
