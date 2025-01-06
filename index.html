@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebAR Media Viewer</title>
-    <!-- Use specific versions known to work together -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
+    <title>WebAR Basic Test</title>
+    <!-- Using most stable versions -->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <!-- Add AR.js Core -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar.js"></script>
+    
     <style>
         .arjs-loader {
             position: fixed;
@@ -19,16 +18,9 @@
             right: 0;
             width: 50px;
             height: 50px;
-            display: none;
-        }
-        
-        .arjs-loader.is-loading {
-            display: block;
         }
         
         .arjs-loader div {
-            box-sizing: border-box;
-            display: block;
             position: absolute;
             width: 44px;
             height: 44px;
@@ -43,129 +35,68 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        #debug {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            z-index: 999;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+        }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <!-- Loading indicator -->
     <div class="arjs-loader">
         <div></div>
     </div>
-
-    <!-- Error message container -->
-    <div id="error-message" style="position: fixed; top: 10px; left: 10px; color: red; z-index: 1000;"></div>
+    <div id="debug"></div>
 
     <a-scene
         embedded
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-        renderer="logarithmicDepthBuffer: true;"
+        arjs="sourceType: webcam; debugUIEnabled: true;"
         vr-mode-ui="enabled: false"
     >
-        <a-assets timeout="30000">
-            <video 
-                id="video-asset" 
-                src="whole gif.mp4"
-                preload="auto"
-                loop="true"
-                crossorigin="anonymous"
-                playsinline
-                webkit-playsinline
-                autoplay
-                muted
-            ></video>
-            <img 
-                id="gif-asset" 
-                src="top.gif"
-                crossorigin="anonymous"
-            />
-        </a-assets>
-
-        <!-- Video Marker -->
-        <a-marker 
-            preset="hiro"
-            smooth="true"
-            smoothCount="5"
-            smoothTolerance="0.01"
-            smoothThreshold="5"
-        >
-            <a-video
-                src="#video-asset"
-                position="0 0 0"
-                rotation="-90 0 0"
-                width="2"
-                height="1.5"
-                play="true"
-            ></a-video>
+        <a-marker preset="hiro">
+            <a-box position="0 0.5 0" material="color: red;"></a-box>
         </a-marker>
-
-        <!-- GIF Marker -->
-        <a-marker 
-            preset="kanji"
-            smooth="true"
-            smoothCount="5"
-            smoothTolerance="0.01"
-            smoothThreshold="5"
-        >
-            <a-image
-                src="#gif-asset"
-                position="0 0 0"
-                rotation="-90 0 0"
-                width="2"
-                height="2"
-            ></a-image>
-        </a-marker>
-
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // Show loading indicator
-        document.querySelector('.arjs-loader').classList.add('is-loading');
-
-        // Error handling function
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = message;
-        }
-
-        window.addEventListener('load', () => {
-            // Get video element
-            const video = document.getElementById('video-asset');
-            
-            // Handle video loading error
-            video.addEventListener('error', (e) => {
-                showError('Error loading video: ' + (e.message || 'Unknown error'));
-            });
-
-            // Auto-play video when loaded
-            video.play().catch((error) => {
-                showError('Video autoplay failed: ' + error.message);
-            });
-
-            // Handle marker events
-            const videoMarker = document.querySelector('a-marker[preset="hiro"]');
-            videoMarker.addEventListener('markerFound', () => {
-                video.play().catch((error) => {
-                    showError('Video play on marker failed: ' + error.message);
-                });
-            });
-
-            // Hide loading indicator when scene is ready
-            const scene = document.querySelector('a-scene');
-            scene.addEventListener('loaded', () => {
-                document.querySelector('.arjs-loader').classList.remove('is-loading');
-            });
-
-            // Handle AR.js initialization errors
-            scene.addEventListener('arError', (error) => {
-                showError('AR.js Error: ' + error.detail);
-            });
+        const debugDiv = document.getElementById('debug');
+        
+        // Log initialization steps
+        window.addEventListener('camera-init', (e) => {
+            debugDiv.innerHTML += 'Camera initialized<br>';
         });
 
-        // Check for WebGL support
-        if (!AFRAME.utils.device.checkHeadsetConnected()) {
-            if (!AFRAME.utils.device.isMobile()) {
-                showError('Please use a mobile device for the best AR experience');
-            }
+        window.addEventListener('camera-error', (e) => {
+            debugDiv.innerHTML += 'Camera error: ' + e + '<br>';
+        });
+
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('loaded', () => {
+            debugDiv.innerHTML += 'Scene loaded<br>';
+        });
+
+        scene.addEventListener('arjs-nft-loaded', (e) => {
+            debugDiv.innerHTML += 'AR.js loaded<br>';
+        });
+
+        // Check requirements
+        debugDiv.innerHTML += 'Checking setup...<br>';
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            debugDiv.innerHTML += 'Camera API available<br>';
+        } else {
+            debugDiv.innerHTML += 'Camera API not available<br>';
+        }
+
+        if (window.isSecureContext) {
+            debugDiv.innerHTML += 'Secure context ✓<br>';
+        } else {
+            debugDiv.innerHTML += 'Not secure context (needs HTTPS) ✗<br>';
         }
     </script>
 </body>
