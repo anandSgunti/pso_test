@@ -126,14 +126,16 @@
             },
             
             toggleAnimation: function() {
-                const image = this.el;
-                if (this.isAnimating) {
-                    image.setAttribute('src', '#static-asset');
-                } else {
-                    image.setAttribute('src', '#gif-asset');
-                }
-                this.isAnimating = !this.isAnimating;
-            }
+    const image = this.el;
+    if (this.isAnimating) {
+        image.setAttribute('src', '#static-asset');
+    } else {
+        const gifUrl = 'top.gif' + new Date().getTime();
+        image.setAttribute('src', gifUrl);
+    }
+    this.isAnimating = !this.isAnimating;
+}
+
         });
 
         window.addEventListener('load', () => {
