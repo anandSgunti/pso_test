@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebAR Basic Test</title>
-    <!-- Using most stable versions -->
+    <title>WebAR Media Viewer</title>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
@@ -35,69 +34,86 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        #debug {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            color: white;
-            z-index: 999;
-            background: rgba(0,0,0,0.8);
-            padding: 10px;
-        }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
     <div class="arjs-loader">
         <div></div>
     </div>
-    <div id="debug"></div>
 
     <a-scene
         embedded
-        arjs="sourceType: webcam; debugUIEnabled: true;"
+        arjs="sourceType: webcam; debugUIEnabled: false;"
         vr-mode-ui="enabled: false"
     >
+        <a-assets>
+            <!-- Replace with your actual video path -->
+            <video 
+                id="video-asset" 
+                src="/path/to/your/video.mp4"
+                preload="auto"
+                loop
+                crossorigin="anonymous"
+                playsinline
+                webkit-playsinline
+                muted
+                autoplay
+            ></video>
+            <!-- Replace with your actual GIF path -->
+            <img 
+                id="gif-asset" 
+                src="/path/to/your/animation.gif"
+                crossorigin="anonymous"
+            />
+        </a-assets>
+
+        <!-- Video Marker -->
         <a-marker preset="hiro">
-            <a-box position="0 0.5 0" material="color: red;"></a-box>
+            <a-video
+                src="#video-asset"
+                position="0 0.1 0"
+                rotation="-90 0 0"
+                width="2"
+                height="1.5"
+            ></a-video>
         </a-marker>
+
+        <!-- GIF Marker -->
+        <a-marker preset="kanji">
+            <a-image
+                src="#gif-asset"
+                position="0 0.1 0"
+                rotation="-90 0 0"
+                width="2"
+                height="2"
+            ></a-image>
+        </a-marker>
+
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        const debugDiv = document.getElementById('debug');
-        
-        // Log initialization steps
-        window.addEventListener('camera-init', (e) => {
-            debugDiv.innerHTML += 'Camera initialized<br>';
+        window.addEventListener('load', () => {
+            const video = document.getElementById('video-asset');
+            const videoMarker = document.querySelector('a-marker[preset="hiro"]');
+            
+            // Play video when marker is found
+            videoMarker.addEventListener('markerFound', () => {
+                video.play().catch(function(error) {
+                    console.log("Video play error:", error);
+                });
+            });
+
+            // Optional: pause when marker is lost
+            videoMarker.addEventListener('markerLost', () => {
+                video.pause();
+            });
+
+            // Initial play attempt
+            video.play().catch(function(error) {
+                console.log("Initial video play error:", error);
+            });
         });
-
-        window.addEventListener('camera-error', (e) => {
-            debugDiv.innerHTML += 'Camera error: ' + e + '<br>';
-        });
-
-        const scene = document.querySelector('a-scene');
-        scene.addEventListener('loaded', () => {
-            debugDiv.innerHTML += 'Scene loaded<br>';
-        });
-
-        scene.addEventListener('arjs-nft-loaded', (e) => {
-            debugDiv.innerHTML += 'AR.js loaded<br>';
-        });
-
-        // Check requirements
-        debugDiv.innerHTML += 'Checking setup...<br>';
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            debugDiv.innerHTML += 'Camera API available<br>';
-        } else {
-            debugDiv.innerHTML += 'Camera API not available<br>';
-        }
-
-        if (window.isSecureContext) {
-            debugDiv.innerHTML += 'Secure context ✓<br>';
-        } else {
-            debugDiv.innerHTML += 'Not secure context (needs HTTPS) ✗<br>';
-        }
     </script>
 </body>
 </html>
