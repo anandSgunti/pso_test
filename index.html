@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebAR Media Viewer</title>
+    <title>WebAR Interactive Media</title>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
@@ -34,12 +34,27 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Add tap indicator */
+        .tap-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
     <div class="arjs-loader">
         <div></div>
     </div>
+    <div class="tap-indicator">Tap the image to animate!</div>
 
     <a-scene
         embedded
@@ -57,6 +72,13 @@
                 webkit-playsinline
                 muted
             ></video>
+            <!-- Static first frame of your GIF -->
+            <img 
+                id="static-asset" 
+                src="circle.png"
+                crossorigin="anonymous"
+            />
+            <!-- Animated GIF -->
             <img 
                 id="gif-asset" 
                 src="top.gif"
@@ -77,13 +99,15 @@
                     height="1"
                 ></a-video>
 
-                <!-- GIF on the right -->
+                <!-- Interactive GIF on the right -->
                 <a-image
-                    src="#gif-asset"
+                    id="interactive-gif"
+                    src="#static-asset"
                     position="1.5 0.1 0"
                     rotation="-90 0 0"
                     width="1.5"
                     height="1.5"
+                    class="clickable"
                 ></a-image>
             </a-entity>
         </a-marker>
@@ -92,12 +116,49 @@
     </a-scene>
 
     <script>
+        // Register click handler component
+        AFRAME.registerComponent('gif-handler', {
+            init: function() {
+                this.isAnimating = false;
+                this.el.addEventListener('click', () => {
+                    this.toggleAnimation();
+                });
+            },
+            
+            toggleAnimation: function() {
+                const image = this.el;
+                if (this.isAnimating) {
+                    image.setAttribute('src', '#static-asset');
+                } else {
+                    image.setAttribute('src', '#gif-asset');
+                }
+                this.isAnimating = !this.isAnimating;
+            }
+        });
+
         window.addEventListener('load', () => {
             const video = document.getElementById('video-asset');
             const videoMarker = document.querySelector('a-marker');
+            const interactiveGif = document.getElementById('interactive-gif');
             let isFirstDetection = true;
             
-            // Play video when marker is found
+            // Add click handler to GIF
+            interactiveGif.setAttribute('gif-handler', '');
+            
+            // Make GIF clickable
+            interactiveGif.setAttribute('class', 'clickable');
+            
+            // Initialize raycaster for touch/click
+            const camera = document.querySelector('[camera]');
+            camera.setAttribute('raycaster', {
+                objects: '.clickable'
+            });
+            camera.setAttribute('cursor', {
+                rayOrigin: 'mouse',
+                fuse: false
+            });
+            
+            // Video marker detection handling
             videoMarker.addEventListener('markerFound', () => {
                 if (isFirstDetection) {
                     video.currentTime = 0;
@@ -108,7 +169,6 @@
                 });
             });
 
-            // Pause video when marker is lost
             videoMarker.addEventListener('markerLost', () => {
                 video.pause();
             });
