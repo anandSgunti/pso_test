@@ -3,50 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR AR Example</title>
-    <script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/webxr-polyfill@latest/build/webxr-polyfill.js"></script>
+    <title>WebAR Video Player</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js@2.2.1/aframe/build/aframe-ar.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
 </head>
 <body>
-    <button id="start">Start AR</button>
-    <script>
-        let xrSession = null;
-        const button = document.getElementById('start');
+    <a-scene embedded arjs>
+        <!-- Marker -->
+        <a-marker preset="hiro">
+            <!-- Video asset -->
+            <a-video 
+                src="#videoAsset" 
+                width="4" 
+                height="2.25" 
+                position="0 1 0"></a-video>
+        </a-marker>
 
-        button.addEventListener('click', async () => {
-            if (navigator.xr) {
-                xrSession = await navigator.xr.requestSession('immersive-ar', {
-                    requiredFeatures: ['hit-test']
-                });
-                const gl = document.createElement('canvas').getContext('webgl', { xrCompatible: true });
-                xrSession.addEventListener('end', () => {
-                    xrSession = null;
-                });
-                await xrSession.end();
-                // Start the rendering loop
-                render();
-            }
-        });
+        <a-entity camera></a-entity>
 
-        async function render() {
-            const frame = await xrSession.requestAnimationFrame(render);
-            const hitTestSource = await xrSession.requestHitTestSource({ space: frame.camera });
-            const hitTestResults = await xrSession.requestHitTest(frame.camera);
-
-            if (hitTestResults.length > 0) {
-                const hitPose = hitTestResults[0].getPose(xrSession.referenceSpace);
-                // Add your 3D object here
-                const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-                const cube = new THREE.Mesh(geometry, material);
-                
-                // Position the cube at the hit test result
-                cube.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z);
-                
-                // Add the cube to the scene and render
-                scene.add(cube);
-            }
-        }
-    </script>
+        <!-- Video Asset Definition -->
+        <video id="videoAsset" autoplay loop="true" crossorigin="anonymous" playsinline>
+            <source src="whole gif.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </a-scene>
 </body>
 </html>
