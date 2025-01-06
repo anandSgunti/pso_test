@@ -64,26 +64,28 @@
             />
         </a-assets>
 
-        <!-- Video Marker -->
+        <!-- Single marker with both media -->
         <a-marker preset="hiro">
-            <a-video
-                src="#video-asset"
-                position="0 0.1 0"
-                rotation="-90 0 0"
-                width="2"
-                height="1.5"
-            ></a-video>
-        </a-marker>
+            <!-- Container for better organization -->
+            <a-entity position="0 0 0">
+                <!-- Video on the left -->
+                <a-video
+                    src="#video-asset"
+                    position="-1.5 0.1 0"
+                    rotation="-90 0 0"
+                    width="1.5"
+                    height="1"
+                ></a-video>
 
-        <!-- GIF Marker -->
-        <a-marker preset="kanji">
-            <a-image
-                src="#gif-asset"
-                position="0 0.1 0"
-                rotation="-90 0 0"
-                width="2"
-                height="2"
-            ></a-image>
+                <!-- GIF on the right -->
+                <a-image
+                    src="#gif-asset"
+                    position="1.5 0.1 0"
+                    rotation="-90 0 0"
+                    width="1.5"
+                    height="1.5"
+                ></a-image>
+            </a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -92,14 +94,13 @@
     <script>
         window.addEventListener('load', () => {
             const video = document.getElementById('video-asset');
-            const videoMarker = document.querySelector('a-marker[preset="hiro"]');
+            const videoMarker = document.querySelector('a-marker');
             let isFirstDetection = true;
             
-            // Play video only when marker is found
+            // Play video when marker is found
             videoMarker.addEventListener('markerFound', () => {
-                // If this is the first time we've seen the marker
                 if (isFirstDetection) {
-                    video.currentTime = 0; // Reset to start
+                    video.currentTime = 0;
                     isFirstDetection = false;
                 }
                 video.play().catch(function(error) {
