@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebAR Interactive Media</title>
+    <title>WebAR Interactive GIF</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
     <style>
         .arjs-loader {
             position: fixed;
@@ -18,7 +17,6 @@
             width: 50px;
             height: 50px;
         }
-        
         .arjs-loader div {
             position: absolute;
             width: 44px;
@@ -29,13 +27,10 @@
             border-color: #fff transparent transparent transparent;
             animation: arjs-loader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
-
         @keyframes arjs-loader {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Add tap indicator */
         .tap-indicator {
             position: fixed;
             bottom: 20px;
@@ -62,61 +57,30 @@
         vr-mode-ui="enabled: false"
     >
         <a-assets>
-            <video 
-                id="video-asset" 
-                src="whole gif.mp4"
-                preload="auto"
-                loop
-                crossorigin="anonymous"
-                playsinline
-                webkit-playsinline
-                muted
-            ></video>
             <!-- Static first frame of your GIF -->
             <img 
                 id="static-asset" 
                 src="circle.png"
                 crossorigin="anonymous"
             />
-            <!-- Animated GIF -->
-            <img 
-                id="gif-asset" 
-                src="top.gif"
-                crossorigin="anonymous"
-            />
         </a-assets>
 
-        <!-- Single marker with both media -->
         <a-marker preset="hiro">
-            <!-- Container for better organization -->
-            <a-entity position="0 0 0">
-                <!-- Video on the left -->
-                <a-video
-                    src="#video-asset"
-                    position="-1.5 0.1 0"
-                    rotation="-90 0 0"
-                    width="1.5"
-                    height="1"
-                ></a-video>
-
-                <!-- Interactive GIF on the right -->
-                <a-image
-                    id="interactive-gif"
-                    src="#static-asset"
-                    position="1.5 0.1 0"
-                    rotation="-90 0 0"
-                    width="1.5"
-                    height="1.5"
-                    class="clickable"
-                ></a-image>
-            </a-entity>
+            <a-plane
+                id="interactive-gif"
+                src="#static-asset"
+                position="0 0.1 0"
+                rotation="-90 0 0"
+                width="1.5"
+                height="1.5"
+                class="clickable"
+            ></a-plane>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // Register click handler component
         AFRAME.registerComponent('gif-handler', {
             init: function() {
                 this.isAnimating = false;
@@ -124,33 +88,23 @@
                     this.toggleAnimation();
                 });
             },
-            
             toggleAnimation: function() {
-    const image = this.el;
-    if (this.isAnimating) {
-        image.setAttribute('src', '#static-asset');
-    } else {
-        const gifUrl = 'top.gif' + new Date().getTime();
-        image.setAttribute('src', gifUrl);
-    }
-    this.isAnimating = !this.isAnimating;
-}
-
+                const image = this.el;
+                if (this.isAnimating) {
+                    image.setAttribute('src', '#static-asset');
+                } else {
+                    const gifUrl = 'top.gif?' + new Date().getTime();
+                    image.setAttribute('src', gifUrl);
+                }
+                this.isAnimating = !this.isAnimating;
+            }
         });
 
         window.addEventListener('load', () => {
-            const video = document.getElementById('video-asset');
-            const videoMarker = document.querySelector('a-marker');
             const interactiveGif = document.getElementById('interactive-gif');
-            let isFirstDetection = true;
-            
-            // Add click handler to GIF
             interactiveGif.setAttribute('gif-handler', '');
-            
-            // Make GIF clickable
             interactiveGif.setAttribute('class', 'clickable');
-            
-            // Initialize raycaster for touch/click
+
             const camera = document.querySelector('[camera]');
             camera.setAttribute('raycaster', {
                 objects: '.clickable'
@@ -158,21 +112,6 @@
             camera.setAttribute('cursor', {
                 rayOrigin: 'mouse',
                 fuse: false
-            });
-            
-            // Video marker detection handling
-            videoMarker.addEventListener('markerFound', () => {
-                if (isFirstDetection) {
-                    video.currentTime = 0;
-                    isFirstDetection = false;
-                }
-                video.play().catch(function(error) {
-                    console.log("Video play error:", error);
-                });
-            });
-
-            videoMarker.addEventListener('markerLost', () => {
-                video.pause();
             });
         });
     </script>
