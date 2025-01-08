@@ -4,7 +4,6 @@
     <title>Interactive WebAR Model Viewer</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <!-- Gesture handler for touch interactions -->
     <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
     
     <style>
@@ -66,9 +65,34 @@
         arjs="sourceType: webcam; debugUIEnabled: false;"
         vr-mode-ui="enabled: false"
         gesture-detector
+        renderer="physicallyCorrectLights: true; colorManagement: true; exposure: 1;"
     >
-        <!-- GLB model -->
+        <!-- Environment and Lighting -->
+        <a-entity light="type: ambient; intensity: 0.5; color: #ffffff"></a-entity>
+        
         <a-marker preset="hiro" smooth="true" smoothCount="5">
+            <!-- Adding multiple lights for better illumination -->
+            <a-entity light="type: directional; 
+                             color: #ffffff; 
+                             intensity: 0.8; 
+                             castShadow: true" 
+                      position="1 1 1">
+            </a-entity>
+
+            <a-entity light="type: directional; 
+                             color: #ffffff; 
+                             intensity: 0.5;" 
+                      position="-1 1 0">
+            </a-entity>
+
+            <a-entity light="type: point;
+                             color: #ffffff;
+                             intensity: 0.5;
+                             distance: 50"
+                      position="0 2 0">
+            </a-entity>
+
+            <!-- Model with material enhancements -->
             <a-entity
                 id="model"
                 position="0 0 0"
@@ -77,24 +101,48 @@
                 gltf-model="./he.glb"
                 gesture-handler="minScale: 0.25; maxScale: 10"
                 animation-mixer
-            ></a-entity>
+                material="metalness: 0.1; roughness: 0.5;"
+                shadow="cast: true; receive: true">
+            </a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
+        // Component for dynamic lighting control
+        AFRAME.registerComponent('light-control', {
+            init: function() {
+                this.model = document.getElementById('model');
+                this.intensity = 0.5;
+                this.updateLighting();
+            },
+            
+            updateLighting: function() {
+                // Auto-adjust lighting based on marker visibility
+                document.querySelector('a-marker').addEventListener('markerFound', () => {
+                    const lights = document.querySelectorAll('[light]');
+                    lights.forEach(light => {
+                        if (light.getAttribute('light').type === 'ambient') {
+                            light.setAttribute('light', 'intensity', this.intensity);
+                        }
+                    });
+                });
+            }
+        });
+
         window.addEventListener('load', () => {
             const model = document.getElementById('model');
             const marker = document.querySelector('a-marker');
             
-            // Handle marker detection
+            // Add light control to scene
+            document.querySelector('a-scene').setAttribute('light-control', '');
+            
             marker.addEventListener('markerFound', () => {
                 console.log('Marker detected');
-                // You can add custom behavior when marker is found
             });
 
-            // Double tap to reset model
+            // Double tap to reset
             let lastTap = 0;
             document.addEventListener('click', (event) => {
                 const currentTime = new Date().getTime();
@@ -106,10 +154,14 @@
                 lastTap = currentTime;
             });
 
-            // Optional: Add custom animations or interactions
+            // Handle model loading
             model.addEventListener('model-loaded', () => {
                 console.log('Model loaded');
-                // You can add custom behavior when model is loaded
+                // Adjust material properties after model loads
+                model.setAttribute('material', {
+                    metalness: 0.1,
+                    roughness: 0.5
+                });
             });
         });
     </script>
