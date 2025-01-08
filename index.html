@@ -1,22 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <title>WebAR Media Viewer</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-gif-shader@master/dist/aframe-gif-shader.min.js"></script>
+    
+    <style>
+        .arjs-loader {
+            position: fixed;
+            z-index: 999;
+            overflow: show;
+            margin: auto;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+        }
+        
+        .arjs-loader div {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            margin: 8px;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            border-color: #fff transparent transparent transparent;
+            animation: arjs-loader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
 
+        @keyframes arjs-loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <div class="arjs-loader">
+        <div></div>
+    </div>
+
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+    >
+        <a-assets>
+            <video 
+                id="video-asset" 
+                src="whole gif.mp4"
+                preload="auto"
+                loop
+                crossorigin="anonymous"
+                playsinline
+                webkit-playsinline
+                muted
+            ></video>
+            <img 
+                id="gif-asset" 
+                src="top.gif"
+                crossorigin="anonymous"
+            />
+        </a-assets>
+
+        <!-- Single marker with both media -->
         <a-marker preset="hiro">
-            <a-entity
-                geometry="primitive: plane; width: 1; height: 1;"
-                material="shader: gif; src: url(pulsing effect.gif)"
-                position="0 0 0"
-                rotation="-90 0 0">
+            <a-entity position="0 0 0">
+                <!-- Video on the left -->
+                <a-video
+                    src="#video-asset"
+                    position="-1.5 0.1 0"
+                    rotation="-90 0 0"
+                    width="1.5"
+                    height="1"
+                ></a-video>
+
+                <!-- GIF on the right (will autoplay) -->
+                <a-image
+                    src="#gif-asset"
+                    position="1.5 0.1 0"
+                    rotation="-90 0 0"
+                    width="1.5"
+                    height="1.5"
+                ></a-image>
             </a-entity>
         </a-marker>
+
         <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+        window.addEventListener('load', () => {
+            const video = document.getElementById('video-asset');
+            const videoMarker = document.querySelector('a-marker');
+            let isFirstDetection = true;
+            
+            // Handle marker detection
+            videoMarker.addEventListener('markerFound', () => {
+                if (isFirstDetection) {
+                    video.currentTime = 0;
+                    isFirstDetection = false;
+                }
+                video.play().catch(function(error) {
+                    console.log("Video play error:", error);
+                });
+            });
+
+            // Pause video when marker is lost
+            videoMarker.addEventListener('markerLost', () => {
+                video.pause();
+            });
+        });
+    </script>
 </body>
 </html>
