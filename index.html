@@ -150,39 +150,48 @@
         });
 
         // Chatbot API Integration (Streaming AI Response)
-        async function getChatResponse(userMessage) {
-            const response = await fetch("https://ari-b6xq.onrender.com/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage })
-            });
+    // Chatbot API Integration (Streaming AI Response)
+    async function getChatResponse(userMessage) {
+        const response = await fetch("https://ari-b6xq.onrender.com/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userMessage })
+        });
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let finalResponse = "";
-            const chatResponseElement = document.getElementById("chat-response");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let finalResponse = "";
+        const chatResponseElement = document.getElementById("chat-response");
+        const model = document.getElementById("model");
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                finalResponse += decoder.decode(value);
-                chatResponseElement.innerText = finalResponse; // Update response in real-time
-                if (userMessage.includes("Broken Heart syndrome")) {
-                    model.setAttribute('rotation', '0 45 0');      
-                    model.setAttribute('scale', '2 2 2');
-            }
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            finalResponse += decoder.decode(value);
+            chatResponseElement.innerText = finalResponse; // Update response in real-time
         }
 
-        // Function to Send User Input to AI
-        function sendMessage() {
-            const userMessage = document.getElementById("user-message").value;
-            if (userMessage) {
-                document.getElementById("chat-response").innerText = "Thinking...";
-                getChatResponse(userMessage);
+        // Delay transformation after response is fully displayed
+        setTimeout(() => {
+            if (userMessage.toLowerCase().includes("broken heart syndrome")) {
+                model.setAttribute('scale', '2.5 2.5 2.5'); // Scale up
+                model.setAttribute('rotation', '0 180 0');  // Rotate 180 degrees
+            } else {
+                model.setAttribute('scale', '1 1 1');   // Reset scale
+                model.setAttribute('rotation', '0 0 0'); // Reset rotation
             }
+        }, 500); // Short delay after response
+    }
+
+    // Function to Send User Input to AI
+    function sendMessage() {
+        const userMessage = document.getElementById("user-message").value;
+        if (userMessage) {
+            document.getElementById("chat-response").innerText = "Thinking...";
+            getChatResponse(userMessage);
         }
     }
+
     </script>
 </body>
-
 </html>
