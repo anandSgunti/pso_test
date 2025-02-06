@@ -167,7 +167,9 @@
                 if (done) break;
                 finalResponse += decoder.decode(value);
                 chatResponseElement.innerText = finalResponse; // Update response in real-time
-                model.setAttribute('scale', '2 2 2');
+                if (userMessage.includes("Broken Heart syndrome")) {
+                    model.setAttribute('rotation', '0 45 0');      
+                    model.setAttribute('scale', '2 2 2');
             }
         }
 
@@ -179,6 +181,8 @@
                 getChatResponse(userMessage);
             }
         }
+    }
     </script>
 </body>
+
 </html>
