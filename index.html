@@ -1,231 +1,381 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive WebAR Chat</title>
-    
-    <!-- A-Frame and AR.js -->
+    <title>Interactive WebAR Model Viewer</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
-
+    
     <style>
-        /* Overall Layout */
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: linear-gradient(180deg, #eef2f3, #cfd9df);
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-
-        #container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 90%;
-            max-width: 1200px;
-        }
-
-        /* AR Heart Section */
-        #heart-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Chat Section */
-        #chat-section {
-            flex: 1;
-            text-align: left;
-            padding: 20px;
-            max-width: 500px;
-        }
-
-        /* Heading */
-        #chat-section h2 {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        /* Chat Input Bar */
-        .chat-input-bar {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            padding: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Input Field */
-        .chat-input-bar input {
-            flex: 1;
-            padding: 8px;
-            border-radius: 20px;
-            border: none;
-            background: transparent;
-            color: black;
-            font-size: 14px;
-            outline: none;
-        }
-
-        /* Send Button */
-        .send-button {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-        }
-
-        .send-button img {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Chat Response (Speech Bubble) */
-        #chat-response-container {
-            margin-top: 15px;
+        #chat-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
             padding: 10px;
-            max-width: 80%;
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            font-size: 16px;
-            color: black;
-            line-height: 1.4;
-            text-align: left;
-            display: none;
-        }
-
-        /* Thinking Animation */
-        .thinking-animation {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            gap: 5px;
-            padding: 10px;
+        }
+        #chat-response {
+            margin-top: 10px;
+        }
+        input, button {
+            padding: 5px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
         }
 
-        .thinking-animation span {
-            width: 8px;
-            height: 8px;
-            background-color: black;
-            border-radius: 50%;
-            opacity: 0.6;
-            animation: bounce 1.5s infinite ease-in-out;
-        }
+        #chat-container {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 320px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1); /* Transparent */
+        backdrop-filter: blur(10px); /* Frosted Glass Effect */
+        border-radius: 15px;
+        box-shadow: 0px 4px 12px rgba(255, 255, 255, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.3s ease-in-out;
+    }
 
-        @keyframes bounce {
-            0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
-            40% { transform: translateY(-6px); opacity: 1; }
-        }
-    </style>
+    /* Chat response container (Separate from input) */
+    #chat-response-container {
+        width: 100%;
+        max-height: 100px; /* Limit height */
+        overflow-y: auto; /* Enable scrolling */
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        text-align: left;
+    }
+
+    /* Chat message bubble (Response Area) */
+    .chat-bubble {
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 14px;
+        word-wrap: break-word;
+        text-align: left;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Fade-in animation for messages */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Chat input bar */
+    .chat-input-bar {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 5px;
+    }
+
+    /* Input field */
+    input {
+        flex: 1;
+        padding: 8px;
+        border-radius: 20px;
+        border: none;
+        background: transparent;
+        color: white;
+        font-size: 14px;
+        outline: none;
+    }
+
+    /* Send button (icon) */
+    .send-button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+    }
+
+    .send-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    /* Send icon */
+    .send-button img {
+        width: 20px;
+        height: 20px;
+        filter: invert(1); /* Make the icon white */
+    }
+
+    /* Thinking Animation Container */
+.thinking-animation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 10px;
+}
+
+/* Individual Bouncing Dots */
+.thinking-animation span {
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: bounce 1.5s infinite ease-in-out;
+}
+
+/* Dot Animations */
+.thinking-animation span:nth-child(1) { animation-delay: 0s; }
+.thinking-animation span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-animation span:nth-child(3) { animation-delay: 0.4s; }
+
+/* Bouncing Effect */
+@keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
+    40% { transform: translateY(-6px); opacity: 1; }
+}
+
+</style>
+
 </head>
-<body>
-
-    <div id="container">
-        <!-- 3D AR Heart Model -->
-        <div id="heart-container">
-            <a-scene embedded arjs>
-                <a-marker preset="hiro">
-                    <a-entity gltf-model="./reheart.glb" 
-                              position="0 1 -3" 
-                              rotation="0 180 0" 
-                              scale="1 1 1"
-                              gesture-handler
-                              animation-mixer>
-                    </a-entity>
-                </a-marker>
-                <a-camera position="0 0 0"></a-camera>
-            </a-scene>
-        </div>
-
-        <!-- Chat Section -->
-        <div id="chat-section">
-            <h2>Ask me about Broken Heart Syndrome...</h2>
-
-            <!-- Chat Input -->
-            <div class="chat-input-bar">
-                <input type="text" id="user-message" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
-                <button class="send-button" onclick="sendMessage()">
-                    <img src="https://cdn-icons-png.flaticon.com/512/786/786205.png" alt="Send">
-                </button>
-            </div>
-
-            <!-- Chat Response (Speech Bubble) -->
-            <div id="chat-response-container">
-                <div id="thinking-animation" class="thinking-animation" style="display: none;">
-                    <span></span><span></span><span></span>
-                </div>
-            </div>
-        </div>
+<body style="margin: 0; overflow: hidden;">
+    <div class="arjs-loader">
+        <div></div>
+    </div>
+    <div id="instructions">
+        ⟲ One finger rotate | ↔️ Two fingers scale | 👆 Double tap to reset
     </div>
 
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        gesture-detector
+        renderer="physicallyCorrectLights: true; colorManagement: true; exposure: 2; toneMappingMethod: linear;"
+    >
+        <!-- Maximum Brightness Lighting Setup -->
+        <a-entity light="type: ambient; intensity: 2; color: #FFFFFF"></a-entity>
+        
+        <a-marker preset="hiro" smooth="true" smoothCount="5">
+            <!-- Intense Directional Lights -->
+            <a-entity light="type: directional; 
+                             color: #FFFFFF; 
+                             intensity: 2; 
+                             castShadow: true"
+                      position="1 4 2">
+            </a-entity>
+
+            <a-entity light="type: directional; 
+                             color: #FFFFFF; 
+                             intensity: 1.5;" 
+                      position="-1 4 -2">
+            </a-entity>
+
+            <a-entity light="type: point;
+                             color: #FFFFFF;
+                             intensity: 1.5;
+                             distance: 100"
+                      position="0 3 0">
+            </a-entity>
+
+            <!-- Model with Maximum Brightness Properties -->
+            <a-entity
+                id="model"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="1 1 1"
+                gltf-model="./reheart.glb"
+                gesture-handler="minScale: 0.25; maxScale: 10"
+                animation-mixer
+                material="metalness: 0.1; 
+                          roughness: 0.2; 
+                          emissive: #FFFFFF; 
+                          emissiveIntensity: 0.5; 
+                          color: #FFFFFF;"
+                shadow="cast: true; receive: false">
+            </a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Chat UI for AI Interaction -->
+    <div id="chat-container">
+        <!-- Chat Input Bar -->
+        <div class="chat-input-bar">
+            <input type="text" id="user-message" placeholder="Ask something..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" onclick="sendMessage()">
+                <img src="https://cdn-icons-png.flaticon.com/512/786/786205.png" alt="Send">
+            </button>
+        </div>
+    
+        <!-- Chat Response (Appears Below Input) -->
+        <!-- Chat Response (Appears Below Input) -->
+        <div id="chat-response-container">
+            <!-- Thinking Animation (Appears While AI is Processing) -->
+            <div id="thinking-animation" class="thinking-animation">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+
     <script>
-        // Handle Enter Key Press
-        function handleKeyPress(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-            }
-        }
+        AFRAME.registerComponent('max-brightness', {
+            init: function() {
+                const model = document.getElementById('model');
+                const lights = document.querySelectorAll('[light]');
 
-        // Function to Send User Input to AI
-        function sendMessage() {
-            const userMessage = document.getElementById("user-message").value;
-            const chatResponseContainer = document.getElementById("chat-response-container");
-            const thinkingAnimation = document.getElementById("thinking-animation");
+                // Maximize brightness on marker detection
+                document.querySelector('a-marker').addEventListener('markerFound', () => {
+                    lights.forEach(light => {
+                        light.setAttribute('light', 'intensity', 3);
+                    });
 
-            if (userMessage) {
-                chatResponseContainer.innerHTML = "";
-                chatResponseContainer.style.display = "block";
-                thinkingAnimation.style.display = "flex";
-                chatResponseContainer.appendChild(thinkingAnimation);
-                getChatResponse(userMessage);
-                document.getElementById("user-message").value = "";
+                    // Additional brightness enhancement
+                    model.setAttribute('material', {
+                        emissiveIntensity: 1,
+                        metalness: 0.1,
+                        roughness: 0.1
+                    });
+
+                    // Automatically request AI response
+                    getChatResponse("Describe this AR object.");
+                });
             }
-        }
+        });
+
+        window.addEventListener('load', () => {
+            const model = document.getElementById('model');
+            const marker = document.querySelector('a-marker');
+            
+            // Add max brightness component
+            document.querySelector('a-scene').setAttribute('max-brightness', '');
+            
+            // Double tap reset functionality
+            let lastTap = 0;
+            document.addEventListener('click', (event) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    model.setAttribute('rotation', '0 0 0');
+                    model.setAttribute('scale', '1 1 1');
+                }
+                lastTap = currentTime;
+            });
+        });
 
         // Chatbot API Integration (Streaming AI Response)
-        async function getChatResponse(userMessage) {
-            const response = await fetch("https://ari-b6xq.onrender.com/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage })
-            });
+        // Handle Enter Key Press
+function handleKeyPress(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+}
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let finalResponse = "";
-            const chatResponseContainer = document.getElementById("chat-response-container");
-            const thinkingAnimation = document.getElementById("thinking-animation");
+// Function to Send User Input to AI
+function sendMessage() {
+    const userMessage = document.getElementById("user-message").value;
+    const chatResponseContainer = document.getElementById("chat-response-container");
 
-            chatResponseContainer.innerHTML = "";
-            chatResponseContainer.style.display = "block";
+    if (userMessage) {
+        // Clear previous response before adding new one
+        chatResponseContainer.innerHTML = "";
 
-            const chatBubble = document.createElement("div");
-            chatBubble.classList.add("chat-bubble");
-            chatBubble.innerText = "Thinking...";
-            chatResponseContainer.appendChild(chatBubble);
+        // Show thinking animation
+        const thinkingAnimation = document.createElement("div");
+        thinkingAnimation.classList.add("thinking-animation");
+        thinkingAnimation.innerHTML = `<span></span><span></span><span></span>`;
+        chatResponseContainer.appendChild(thinkingAnimation);
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                finalResponse += decoder.decode(value);
-                chatBubble.innerText = finalResponse;
-            }
+        // Start AI response process
+        getChatResponse(userMessage);
+        
+        // Clear the input field
+        document.getElementById("user-message").value = "";
+    }
+}
 
-            thinkingAnimation.style.display = "none";
+// Chatbot API Integration (Streaming AI Response)
+async function getChatResponse(userMessage) {
+    const response = await fetch("https://ari-b6xq.onrender.com/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage })
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let finalResponse = "";
+    const chatResponseContainer = document.getElementById("chat-response-container");
+
+    // Remove thinking animation before showing the response
+    chatResponseContainer.innerHTML = "";
+
+    // Create a new response bubble
+    const chatBubble = document.createElement("div");
+    chatBubble.classList.add("chat-bubble");
+    chatBubble.innerText = "Thinking..."; // Placeholder text
+    chatResponseContainer.appendChild(chatBubble);
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        finalResponse += decoder.decode(value);
+        chatBubble.innerText = finalResponse; // Update response in real-time
+    }
+
+    // After response is fully displayed, apply model transformation if needed
+    setTimeout(() => {
+        if (userMessage.toLowerCase().includes("broken heart syndrome")) {
+            animateModel(true); // Special animation
+        } else {
+            animateModel(false); // Reset model
         }
-    </script>
+    }, 500);
+}
 
+// Function to animate the 3D model
+function animateModel(enlarge) {
+    const model = document.getElementById("model");
+
+    if (enlarge) {
+        model.setAttribute('animation', 'property: scale; to: 2.5 2.5 2.5; dur: 800; easing: easeOutElastic;');
+        model.setAttribute('animation__rotate', 'property: rotation; to: 0 180 0; dur: 800; easing: easeOutCubic;');
+    } else {
+        model.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 800; easing: easeOutElastic;');
+        model.setAttribute('animation__rotate', 'property: rotation; to: 0 0 0; dur: 800; easing: easeOutCubic;');
+    }
+}
+</script>
 </body>
 </html>
+
+
+
+
+
+
+    
