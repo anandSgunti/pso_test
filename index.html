@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive WebAR Chat</title>
-    
-    <!-- A-Frame and AR.js -->
+    <title>Interactive WebAR Model Viewer</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
-
+    
     <style>
-        /* Overall Layout */
         body {
             margin: 0;
             padding: 0;
@@ -128,47 +123,91 @@
             0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
             40% { transform: translateY(-6px); opacity: 1; }
         }
-    </style>
-</head>
-<body>
 
-    <div id="container">
-        <!-- 3D AR Heart Model -->
-        <div id="heart-container">
-            <a-scene embedded arjs>
-                <a-marker preset="hiro">
-                    <a-entity gltf-model="./reheart.glb" 
-                              position="0 0 0" 
-                              rotation="0 180 0" 
-                              scale="1 1 1"
-                              gesture-handler
-                              animation-mixer>
-                    </a-entity>
-                </a-marker>
-                <a-camera position="0 0 0"></a-camera>
-            </a-scene>
+</style>
+
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <div class="arjs-loader">
+        <div></div>
+    </div>
+    <div id="instructions">
+        ⟲ One finger rotate | ↔️ Two fingers scale | 👆 Double tap to reset
+    </div>
+
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        gesture-detector
+        renderer="physicallyCorrectLights: true; colorManagement: true; exposure: 2; toneMappingMethod: linear;"
+    >
+        <!-- Maximum Brightness Lighting Setup -->
+        <a-entity light="type: ambient; intensity: 2; color: #FFFFFF"></a-entity>
+        
+        <a-marker preset="hiro" smooth="true" smoothCount="5">
+            <!-- Intense Directional Lights -->
+            <a-entity light="type: directional; 
+                             color: #FFFFFF; 
+                             intensity: 2; 
+                             castShadow: true"
+                      position="1 4 2">
+            </a-entity>
+
+            <a-entity light="type: directional; 
+                             color: #FFFFFF; 
+                             intensity: 1.5;" 
+                      position="-1 4 -2">
+            </a-entity>
+
+            <a-entity light="type: point;
+                             color: #FFFFFF;
+                             intensity: 1.5;
+                             distance: 100"
+                      position="0 3 0">
+            </a-entity>
+
+            <!-- Model with Maximum Brightness Properties -->
+            <a-entity
+                id="model"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="1 1 1"
+                gltf-model="./reheart.glb"
+                gesture-handler="minScale: 0.25; maxScale: 10"
+                animation-mixer
+                material="metalness: 0.1; 
+                          roughness: 0.2; 
+                          emissive: #FFFFFF; 
+                          emissiveIntensity: 0.5; 
+                          color: #FFFFFF;"
+                shadow="cast: true; receive: false">
+            </a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Chat UI for AI Interaction -->
+    <div id="chat-section">
+        <h2>Ask me about Broken Heart Syndrome...</h2>
+
+        <!-- Chat Input -->
+        <div class="chat-input-bar">
+            <input type="text" id="user-message" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" onclick="sendMessage()">
+                <img src="https://cdn-icons-png.flaticon.com/512/786/786205.png" alt="Send">
+            </button>
         </div>
 
-        <!-- Chat Section -->
-        <div id="chat-section">
-            <h2>Ask me about Broken Heart Syndrome...</h2>
-
-            <!-- Chat Input -->
-            <div class="chat-input-bar">
-                <input type="text" id="user-message" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
-                <button class="send-button" onclick="sendMessage()">
-                    <img src="https://cdn-icons-png.flaticon.com/512/786/786205.png" alt="Send">
-                </button>
-            </div>
-
-            <!-- Chat Response (Speech Bubble) -->
-            <div id="chat-response-container">
-                <div id="thinking-animation" class="thinking-animation" style="display: none;">
-                    <span></span><span></span><span></span>
-                </div>
+        <!-- Chat Response (Speech Bubble) -->
+        <div id="chat-response-container">
+            <div id="thinking-animation" class="thinking-animation" style="display: none;">
+                <span></span><span></span><span></span>
             </div>
         </div>
     </div>
+
 
     <script>
         AFRAME.registerComponent('max-brightness', {
@@ -215,15 +254,16 @@
             });
         });
 
+        // Chatbot API Integration (Streaming AI Response)
         // Handle Enter Key Press
-        function handleKeyPress(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-            }
-        }
+function handleKeyPress(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+}
 
-        // Function to Send User Input to AI
-        function sendMessage() {
+// Function to Send User Input to AI
+function sendMessage() {
             const userMessage = document.getElementById("user-message").value;
             const chatResponseContainer = document.getElementById("chat-response-container");
             const thinkingAnimation = document.getElementById("thinking-animation");
@@ -269,7 +309,14 @@
 
             thinkingAnimation.style.display = "none";
         }
-    </script>
 
+</script>
 </body>
 </html>
+
+
+
+
+
+
+    
