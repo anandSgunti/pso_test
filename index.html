@@ -35,7 +35,6 @@
 </head>
 <body style="margin: 0; overflow: hidden;">
     <div class="arjs-loader">
-        <div>Loading AR Experience...</div>
     </div>
     <div id="instructions">
         ⟲ One finger rotate | ↔️ Two fingers scale | 👆 Double tap to reset
@@ -78,9 +77,9 @@
                 id="model"
                 position="0 0 0"
                 rotation="0 0 0"
-                scale="1 1 1"
+                scale="0.1 0.1 0.1"
                 gltf-model="./heart_A.gltf"
-                gesture-handler="minScale: 0.25; maxScale: 10"
+                gesture-handler="minScale: 0.1; maxScale: 3"
                 animation-mixer="clip: *; loop: repeat; timeScale: 1"
                 material="metalness: 0.1; 
                           roughness: 0.2; 
