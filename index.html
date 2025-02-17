@@ -3,38 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js Animated 3D Model</title>
+    <title>Marker-Based AR with Animation</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
     <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <!-- AR Scene without Marker (Static Placement) -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;"
-             vr-mode-ui="enabled: false"
-             gesture-detector
-             renderer="physicallyCorrectLights: true; colorManagement: true; exposure: 2; toneMappingMethod: linear;">
+    
+    <!-- AR Scene with Marker -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         
-        <!-- Lighting Setup -->
-        <a-entity light="type: ambient; intensity: 2; color: #FFFFFF"></a-entity>
-        <a-entity light="type: directional; color: #FFFFFF; intensity: 2; castShadow: true" position="1 4 2"></a-entity>
-        <a-entity light="type: directional; color: #FFFFFF; intensity: 1.5;" position="-1 4 -2"></a-entity>
-        <a-entity light="type: point; color: #FFFFFF; intensity: 1.5; distance: 100" position="0 3 0"></a-entity>
-        
-        <!-- 3D Model with Animation -->
-        <a-entity id="model"
-                  position="0 0 -2"
-                  rotation="0 0 0"
-                  scale="0.2 0.2 0.2"
-                  gltf-model="./heart_A.glb"
-                  gesture-handler="minScale: 0.25; maxScale: 10"
-                  animation-mixer="clip: *; loop: repeat; timeScale: 1"
-                  material="metalness: 0.1; roughness: 0.2; emissive: #FFFFFF; emissiveIntensity: 0.5; color: #FFFFFF;"
-                  shadow="cast: true; receive: false">
-        </a-entity>
-        
+        <!-- Hiro Marker -->
+        <a-marker preset="hiro">
+            
+            <!-- Lighting -->
+            <a-entity light="type: ambient; intensity: 2; color: #FFFFFF"></a-entity>
+            <a-entity light="type: directional; color: #FFFFFF; intensity: 2;" position="1 4 2"></a-entity>
+            <a-entity light="type: point; color: #FFFFFF; intensity: 1.5; distance: 100" position="0 3 0"></a-entity>
+            
+            <!-- 3D Model with Animation -->
+            <a-entity id="model"
+                      position="0 0 0"
+                      rotation="0 0 0"
+                      scale="0.2 0.2 0.2"
+                      gltf-model="./heart_A.glb"
+                      animation-mixer="clip: *; loop: repeat; timeScale: 1"
+                      material="metalness: 0.1; roughness: 0.2; emissive: #FFFFFF; emissiveIntensity: 0.5; color: #FFFFFF;"
+                      shadow="cast: true; receive: false">
+            </a-entity>
+            
+        </a-marker>
+
         <!-- Camera -->
         <a-entity camera></a-entity>
+        
     </a-scene>
+
 </body>
 </html>
