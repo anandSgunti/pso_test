@@ -1,43 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marker-Based AR with Animation</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
-    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.min.js"></script>
+    <title>Interactive WebAR Model Viewer</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
+    
+    <style>
+        /* Custom styles */
+        .arjs-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+        }
+        #instructions {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+        }
+    </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    
-    <!-- AR Scene with Marker -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <div class="arjs-loader">
+        <div>Loading AR Experience...</div>
+    </div>
+    <div id="instructions">
+        ⟲ One finger rotate | ↔️ Two fingers scale | 👆 Double tap to reset
+    </div>
+
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        gesture-detector
+        renderer="physicallyCorrectLights: true; colorManagement: true; exposure: 2; toneMappingMethod: linear;"
+    >
+        <!-- Maximum Brightness Lighting Setup -->
+        <a-entity light="type: ambient; intensity: 2; color: #FFFFFF"></a-entity>
         
-        <!-- Hiro Marker -->
-        <a-marker preset="hiro">
-            
-            <!-- Lighting -->
-            <a-entity light="type: ambient; intensity: 2; color: #FFFFFF"></a-entity>
-            <a-entity light="type: directional; color: #FFFFFF; intensity: 2;" position="1 4 2"></a-entity>
-            <a-entity light="type: point; color: #FFFFFF; intensity: 1.5; distance: 100" position="0 3 0"></a-entity>
-            
-            <!-- 3D Model with Animation -->
-            <a-entity id="model"
-                      position="0 0 0"
-                      rotation="0 0 0"
-                      scale="0.2 0.2 0.2"
-                      gltf-model="./heart_A.glb"
-                      animation-mixer="clip: *; loop: repeat; timeScale: 1"
-                      material="metalness: 0.1; roughness: 0.2; emissive: #FFFFFF; emissiveIntensity: 0.5; color: #FFFFFF;"
-                      shadow="cast: true; receive: false">
+        <a-marker preset="hiro" smooth="true" smoothCount="5">
+            <!-- Intense Directional Lights -->
+            <a-entity light="type: directional; 
+                             color: #FFFFFF; 
+                             intensity: 2; 
+                             castShadow: true"
+                      position="1 4 2">
             </a-entity>
-            
+
+            <a-entity light="type: directional; 
+                             color: #FFFFFF; 
+                             intensity: 1.5;" 
+                      position="-1 4 -2">
+            </a-entity>
+
+            <a-entity light="type: point;
+                             color: #FFFFFF;
+                             intensity: 1.5;
+                             distance: 100"
+                      position="0 3 0">
+            </a-entity>
+
+            <!-- 3D Model with Animation -->
+            <a-entity
+                id="model"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="1 1 1"
+                gltf-model="./heart_A.glb"
+                gesture-handler="minScale: 0.25; maxScale: 10"
+                animation-mixer="clip: *; loop: repeat; timeScale: 1"
+                material="metalness: 0.1; 
+                          roughness: 0.2; 
+                          emissive: #FFFFFF; 
+                          emissiveIntensity: 0.5; 
+                          color: #FFFFFF;"
+                shadow="cast: true; receive: false">
+            </a-entity>
         </a-marker>
 
-        <!-- Camera -->
         <a-entity camera></a-entity>
-        
     </a-scene>
 
+    <script>
+        AFRAME.registerComponent('max-brightness', {
+            init: function() {
+                const model = document.getElementById('model');
+                const lights = document.querySelectorAll('[light]');
+
+                // Maximize brightness on marker detection
+                document.querySelector('a-marker').addEventListener('markerFound', () => {
+                    lights.forEach(light => {
+                        light.setAttribute('light', 'intensity', 3);
+                    });
+
+                    // Additional brightness enhancement
+                    model.setAttribute('material', {
+                        emissiveIntensity: 1,
+                        metalness: 0.1,
+                        roughness: 0.1
+                    });
+
+                    // Ensure animation plays when marker is detected
+                    model.setAttribute('animation-mixer', 'clip: *; loop: repeat; timeScale: 1');
+                });
+
+                // Pause animation when marker is lost
+                document.querySelector('a-marker').addEventListener('markerLost', () => {
+                    model.removeAttribute('animation-mixer');
+                });
+            }
+        });
+
+        window.addEventListener('load', () => {
+            const model = document.getElementById('model');
+            const marker = document.querySelector('a-marker');
+            
+            // Add max brightness component
+            document.querySelector('a-scene').setAttribute('max-brightness', '');
+            
+            // Double tap reset functionality
+            let lastTap = 0;
+            document.addEventListener('click', (event) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    model.setAttribute('rotation', '0 0 0');
+                    model.setAttribute('scale', '1 1 1');
+                }
+                lastTap = currentTime;
+            });
+        });
+    </script>
 </body>
 </html>
